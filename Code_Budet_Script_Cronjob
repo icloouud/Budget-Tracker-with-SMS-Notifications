@@ -1,25 +1,21 @@
-from twilio.rest import Client
-
 class SimpleBudgetTracker:
-    def __init__(self, income, phone_number, twilio_sid, twilio_auth_token, twilio_phone_number):
+    def __init__(self, income):
         self.income = income
-        self.budget = {'Needs': 0, 'Wants': 0, 'Savings': 0}
-        self.expenses = {'Needs': 0, 'Wants': 0, 'Savings': 0}
-        self.phone_number = phone_number
-        self.twilio_sid = twilio_sid
-        self.twilio_auth_token = twilio_auth_token
-        self.twilio_phone_number = twilio_phone_number
-        self.client = Client(self.twilio_sid, self.twilio_auth_token)  # Twilio client setup
+        self.budget = {'Needs': 100000, 'Wants': 500000, 'Savings': 15}
+        self.expenses = {'Needs': 100000, 'Wants': 500000, 'Savings': 15}
 
     def set_budget(self):
         print("\n--- Welcome to the Budget Tracker ---")
-        needs_percentage = float(input("Enter percentage for Needs (e.g., 50 for 50%): "))
-        wants_percentage = float(input("Enter percentage for Wants (e.g., 30 for 30%): "))
-        savings_percentage = float(input("Enter percentage for Savings (e.g., 20 for 20%): "))
-
-        if needs_percentage + wants_percentage + savings_percentage != 100:
-            print("Error: Percentages must add up to 100. Please try again.")
-            return self.set_budget()
+        while True:
+            try:
+                needs_percentage = float(input("Enter percentage for Needs (e.g., 50 for 50%): "))
+                wants_percentage = float(input("Enter percentage for Wants (e.g., 30 for 30%): "))
+                savings_percentage = float(input("Enter percentage for Savings (e.g., 20 for 20%): "))
+                if needs_percentage + wants_percentage + savings_percentage == 100:
+                    break
+                print("Error: Percentages must add up to 100. Please try again.")
+            except ValueError:
+                print("Error: Please enter valid numbers.")
 
         self.budget['Needs'] = self.income * (needs_percentage / 100)
         self.budget['Wants'] = self.income * (wants_percentage / 100)
@@ -28,33 +24,26 @@ class SimpleBudgetTracker:
         print(f"\nBudget set successfully: {self.budget}")
 
     def add_expense(self):
-        category = input("\nEnter the expense category (Needs, Wants, Savings): ").capitalize()
-        if category not in self.budget:
+        while True:
+            category = input("\nEnter the expense category (Needs, Wants, Savings): ").capitalize()
+            if category in self.budget:
+                break
             print("Invalid category. Please choose from Needs, Wants, or Savings.")
-            return self.add_expense()
 
-        amount = float(input(f"Enter the amount for {category}: $"))
+        while True:
+            try:
+                amount = float(input(f"Enter the amount for {category}: $"))
+                break
+            except ValueError:
+                print("Error: Please enter a valid amount.")
+
         self.expenses[category] += amount
         self.check_alerts(category)
 
     def check_alerts(self, category):
         if self.expenses[category] > self.budget[category]:
-            alert_message = (f"Alert: You've exceeded your {category} budget! "
-                             f"Budget: ${self.budget[category]:.2f}, "
-                             f"Spent: ${self.expenses[category]:.2f}")
-            print(alert_message)
-            self.send_sms(alert_message)
-
-    def send_sms(self, message):
-        try:
-            message = self.client.messages.create(
-                body=message,
-                from_=self.twilio_phone_number,
-                to=self.phone_number
-            )
-            print(f"SMS Sent: {message.sid}")
-        except Exception as e:
-            print(f"Failed to send SMS: {e}")
+            print(f"\nAlert: You've exceeded your {category} budget!")
+            print(f"Budget: ${self.budget[category]:.2f}, Spent: ${self.expenses[category]:.2f}")
 
     def display_status(self):
         print("\n--- Budget Status ---")
@@ -63,28 +52,17 @@ class SimpleBudgetTracker:
                   f"Spent: ${self.expenses[category]:.2f}, "
                   f"Remaining: ${self.budget[category] - self.expenses[category]:.2f}")
 
-# Main Function to Interact with the User
+# Main Function
 if __name__ == "__main__":
-    # Hardcoded for simplicity, ideally should be set up once.
-    TWILIO_SID = "your_twilio_sid"
-    TWILIO_AUTH_TOKEN = "your_twilio_auth_token"
-    TWILIO_PHONE_NUMBER = "your_twilio_phone_number"  # Your Twilio number
-    USER_PHONE_NUMBER = input("Enter your phone number (with country code, e.g., +123456789): ")
+    try:
+        income = float(input("Enter your monthly income: $"))
+    except ValueError:
+        print("Invalid income input. Please enter a numeric value.")
+        exit()
 
-    # Assume the user knows their monthly income
-    income = float(input("Enter your monthly income: $"))
-
-    # Create an instance of SimpleBudgetTracker
-    tracker = SimpleBudgetTracker(
-        income=income, 
-        phone_number=USER_PHONE_NUMBER,
-        twilio_sid=TWILIO_SID, 
-        twilio_auth_token=TWILIO_AUTH_TOKEN, 
-        twilio_phone_number=TWILIO_PHONE_NUMBER
-    )
-
-    # Set the budget, add expenses, and display status
+    tracker = SimpleBudgetTracker(income)
     tracker.set_budget()
+
     while True:
         tracker.add_expense()
         tracker.display_status()
