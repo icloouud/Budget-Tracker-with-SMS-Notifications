@@ -1,0 +1,2 @@
+# Basic-Python-Code-for-Budget-Tracker-with-SMS-Notifications
+The user can set the budget with percentages for Needs, Wants, and Savings. Expense Tracking:  As the user adds expenses, the app checks if the spending exceeds the allocated budget. If it does, a text alert is sent. Sending Notifications:  When a budget is exceeded, an SMS is sent to the user using Twilio, notifying them of the overage.
