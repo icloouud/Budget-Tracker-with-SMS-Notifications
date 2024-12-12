@@ -20,6 +20,10 @@ Run the script:
 bash
 Copy code
 python budget_tracker.py
-Follow the Prompts:
 
+Follow the Prompts:
+The script now includes a bank-friendly GUI using Tkinter with features for setting budgets, adding expenses, viewing the budget status, and forecasting future expenses with a visual chart. Let me know if you need further customizations or explanations!
 The program will ask for your monthly income, set your budget percentages, and allow you to add expenses. If any expense exceeds the allocated budget, you'll receive an SMS alert.
+
+
+Here is your script, consolidated into a single, user-friendly application with a bank-friendly UI. Let me know if you'd like to add or modify any features!
